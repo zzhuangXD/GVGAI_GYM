@@ -1,0 +1,11 @@
+{
+  "_comment_cpuCores": "用于并行执行 MCTS 模拟的 CPU 核心数。推荐设置为机器的物理核心数。",
+  "_comment_mctsIterations": "MCTS 算法在每一步决策前可执行的最大模拟次数。",
+  "_comment_timeBudgetMillis": "MCTS 算法在每一步决策前的最大可用时间（毫秒）。",
+  "cpuCores": 2,
+  "gameList": ["GameA", "GameB"],
+  "algorithmList": ["OptimizedMCTS"],
+  "mctsIterations": 999999,
+  "timeBudgetMillis": 200,
+  "maxSteps": 600
+}

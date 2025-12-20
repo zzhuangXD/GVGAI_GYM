@@ -838,81 +838,64 @@ public class ArcadeMachine {
      */
     public static boolean tearPlayerDown(Game toPlay, Player[] players, String actionFile, int randomSeed,
 	    boolean record) {
-        // This is finished, no more actions, close the writer.
-        if (toPlay.no_players > 1) {
-            // multi player, write actions to files.
-            try {
-            if ((actionFile != null && !actionFile.equals("") && record)) {
-                BufferedWriter writer = new BufferedWriter(new FileWriter(new File(actionFile)));
 
-                // write random seed and game ticks
-                writer.write(randomSeed + " " + toPlay.getGameTick() + "\n");
-
-                // get player specific information
-
-                String scores = "", winState = "";
-                String[] actions = new String[toPlay.getGameTick() + 1];
-                for (int i = 0; i < actions.length; i++) {
-                actions[i] = "";
-                }
-
-                for (Player p : players) {
-                // scores for all players
-                scores += toPlay.getScore(p.getPlayerID()) + " ";
-
-                // win state for all players
-                winState += (toPlay.getWinner(p.getPlayerID()) == Types.WINNER.PLAYER_WINS ? 1 : 0) + " ";
-
-                // actions for all players (same line if during the same
-                // game tick)
-                int i = 0;
-                for (Types.ACTIONS act : p.getAllActions()) {
-                    actions[i] += act.toString() + " ";
-                    i++;
-                }
-                }
-
-                // write everything to file
-                writer.write(scores + "\n" + winState + "\n");
-                for (String action : actions) {
-                writer.write(action + "\n");
-                }
-
-                writer.close();
-            }
-            } catch (IOException e) {
-            e.printStackTrace();
-            }
-        } else {
-            // single player, let the player do all of this.
-            players[0].teardown(toPlay);
-        }
-
+        // First, inform the players about the result.
+        // This is important so the agent can have the final game state before teardown.
         for (Player p : players) {
-            // Determine the time due for the controller close up.
             ElapsedCpuTimer ect = new ElapsedCpuTimer();
             ect.setMaxTimeMillis(CompetitionParameters.TEAR_DOWN_TIME);
 
-            // Inform about the result and the final game state.
-            // Inform about the result and the final game state.
             if (toPlay.no_players > 1)
-            p.resultMulti(toPlay.getObservationMulti(p.getPlayerID()).copy(), ect);
+                p.resultMulti(toPlay.getObservationMulti(p.getPlayerID()).copy(), ect);
             else
-            p.result(toPlay.getObservation(), ect);
+                p.result(toPlay.getObservation(), ect);
 
-            // Check if we returned on time, and act in consequence.
-            long timeTaken = ect.elapsedMillis();
             if (ect.exceededMaxTime()) {
-            long exceeded = -ect.remainingTimeMillis();
-            System.out.println("Controller tear down time out (" + exceeded + ").");
-
-            toPlay.disqualify(p.getPlayerID());
-            return false;
+                long exceeded = -ect.remainingTimeMillis();
+                System.out.println("Controller tear down time out (" + exceeded + ").");
+                toPlay.disqualify(p.getPlayerID());
+                return false;
             }
 
             if (VERBOSE)
-            System.out.println("Controller tear down time: " + timeTaken + " ms.");
-            return true;
+                System.out.println("Controller result() time: " + ect.elapsedMillis() + " ms.");
+        }
+
+
+        // Now, tear down the players, which includes action logging.
+        if (record) {
+            if (toPlay.no_players > 1) {
+                // multi player, write actions to files.
+                try {
+                    if ((actionFile != null && !actionFile.equals(""))) {
+                        BufferedWriter writer = new BufferedWriter(new FileWriter(new File(actionFile)));
+                        writer.write(randomSeed + " " + toPlay.getGameTick() + "\n");
+                        String scores = "", winState = "";
+                        String[] actions = new String[toPlay.getGameTick() + 1];
+                        for (int i = 0; i < actions.length; i++) actions[i] = "";
+
+                        for (Player p : players) {
+                            scores += toPlay.getScore(p.getPlayerID()) + " ";
+                            winState += (toPlay.getWinner(p.getPlayerID()) == Types.WINNER.PLAYER_WINS ? 1 : 0) + " ";
+                            int i = 0;
+                            if (p.getAllActions() != null) {
+                                for (Types.ACTIONS act : p.getAllActions()) {
+                                    actions[i] += act.toString() + " ";
+                                    i++;
+                                }
+                            }
+                        }
+                        writer.write(scores + "\n" + winState + "\n");
+                        for (String action : actions) writer.write(action + "\n");
+                        writer.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                // single player, let the player do all of this.
+                players[0].teardown(toPlay);
+            }
         }
 
         return true;

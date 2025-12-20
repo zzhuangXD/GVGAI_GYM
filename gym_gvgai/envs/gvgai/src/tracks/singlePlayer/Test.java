@@ -20,7 +20,8 @@ public class Test {
 		String sampleOneStepController = "tracks.singlePlayer.simple.sampleonesteplookahead.Agent";
 		String sampleFlatMCTSController = "tracks.singlePlayer.simple.greedyTreeSearch.Agent";
 
-		String sampleMCTSController = "tracks.singlePlayer.advanced.sampleMCTS.Agent";
+		//String sampleMCTSController = "tracks.singlePlayer.advanced.sampleMCTS.Agent"; // MCTS
+		String sampleMCTSController = "tracks.singlePlayer.optimized_mcts.OptimizedMCTS"; // MCTS
         String sampleRSController = "tracks.singlePlayer.advanced.sampleRS.Agent";
         String sampleRHEAController = "tracks.singlePlayer.advanced.sampleRHEA.Agent";
 		String sampleOLETSController = "tracks.singlePlayer.advanced.olets.Agent";
@@ -38,7 +39,17 @@ public class Test {
 		int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
-		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
+		String suffix = "/" + gameName + ".txt";
+        String replacement = "/" + gameName + "_lvl" + levelIdx + ".txt";
+
+        String level1 = game.replace(suffix, replacement);
+// 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
+// 		System.out.println("gameName = " + gameName);
+//         System.out.println("game = " + game);
+        System.out.println("level = " + level1);
+
+
+
 
 		String recordActionsFile = null;// "actions_" + games[gameIdx] + "_lvl"
 						// + levelIdx + "_" + seed + ".txt";
@@ -46,10 +57,10 @@ public class Test {
 						// executed. null if not to save.
 
 		// 1. This starts a game, in a level, played by a human.
-		ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
+ 		ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
 
 		// 2. This plays a game in a level by the controller.
-//		ArcadeMachine.runOneGame(game, level1, visuals, sampleRHEAController, recordActionsFile, seed, 0);
+// 		ArcadeMachine.runOneGame(game, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
 
 
 		// 3. This replays a game from an action file previously recorded
