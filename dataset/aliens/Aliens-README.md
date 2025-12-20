@@ -48,8 +48,24 @@
 
    ArrayList<Observation>[] npcPositions = turn.state.getNPCPositions(); 
 
-   该数组中的每一项是对应于一个NPC的ArrayList，该ArrayList包含当前游戏状态下，该类NPC的每一个对象的Observation
-   ![image-20251218034925928](C:\Users\Anson\AppData\Roaming\Typora\typora-user-images\image-20251218034925928.png)
+   该数组中的每一项是对应于一个NPC的ArrayList，该ArrayList包含当前游戏状态下，该类NPC的每一个对象的Observation：
+
+   --- Debugging action_index: 286 ---
+   npcPositions array length: 1
+   List 0 (itype: 9): contains 11 objects.
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=380, position=450.0 : 100.0, reference=-1.0 : -1.0, sqDist=213602.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=382, position=325.0 : 100.0, reference=-1.0 : -1.0, sqDist=116477.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=387, position=50.0 : 100.0, reference=-1.0 : -1.0, sqDist=12802.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=390, position=50.0 : 50.0, reference=-1.0 : -1.0, sqDist=5202.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=405, position=850.0 : 50.0, reference=-1.0 : -1.0, sqDist=726802.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=408, position=900.0 : 0.0, reference=-1.0 : -1.0, sqDist=811802.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=415, position=625.0 : 0.0, reference=-1.0 : -1.0, sqDist=391877.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=417, position=500.0 : 0.0, reference=-1.0 : -1.0, sqDist=251002.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=421, position=350.0 : 0.0, reference=-1.0 : -1.0, sqDist=123202.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=425, position=225.0 : 0.0, reference=-1.0 : -1.0, sqDist=51077.0}
+    -> Observation{category=3, itype=9, itypeKey=alienBlue, obsID=429, position=100.0 : 0.0, reference=-1.0 : -1.0, sqDist=10202.0}
+
+   ------------------------------
 
    以上为npcPositions的第一项，即ArrayList 0，其内每个Observation均为同一类NPC(itype=9, itypeKey=)的不同实例，该ArrayList包含11个Observation即该类NPC有11个对象
 
