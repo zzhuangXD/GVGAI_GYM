@@ -1,0 +1,221 @@
+===== Sample 0 (L4) =====
+INPUT:
+=== Game Rules in VGDL ===
+BasicGame
+  SpriteSet
+    floor > Immovable img=oryx/floor3 hidden=True
+    goal  > Door color=GREEN img=oryx/doorclosed1
+    key   > Immovable color=ORANGE img=oryx/key2
+    sword > OrientedFlicker limit=5 singleton=True img=oryx/slash1
+    movable >
+      avatar  > ShootAvatar   stype=sword frameRate=8
+        nokey   > img=oryx/swordman1
+        withkey > color=ORANGE img=oryx/swordmankey1
+      enemy >  
+        monsterQuick > RandomNPC cooldown=2 cons=6 img=oryx/bat1
+        monsterNormal > RandomNPC cooldown=4 cons=8 img=oryx/spider2
+        monsterSlow > RandomNPC cooldown=8 cons=12 img=oryx/scorpion1
+      wall > Immovable autotiling=true img=oryx/wall3
+
+
+  LevelMapping
+    g > floor goal
+    + > floor key        
+    A > floor nokey
+    1 > floor monsterQuick
+    2 > floor monsterNormal
+    3 > floor monsterSlow
+    w > wall
+    . > floor
+
+
+  InteractionSet
+    movable wall  > stepBack
+    nokey goal    > stepBack
+    goal withkey  > killSprite scoreChange=1
+    enemy sword > killSprite scoreChange=2
+    enemy enemy > stepBack
+    avatar enemy > killSprite scoreChange=-1
+    nokey key     > transformTo stype=withkey scoreChange=1 killSecond=True
+
+  TerminationSet
+    SpriteCounter stype=goal   win=True
+    SpriteCounter stype=avatar win=False
+
+=== Game Rules in Natural Language ===
+This is a grid-based dungeon game with combat.
+You control an avatar. The avatar has two visual states: without key (A) and with key (C).
+Your task is to take the key, go to the goal, and avoid monsters.
+Directional actions can change the facing direction; if the avatar is already facing that direction, it will move one cell in that direction (otherwise it only turns).
+You can use ACTION_USE to make the avatar swing a sword to attack enemies in the adjacent cell in the current facing direction. If the attack hits, that enemy is eliminated and the score increases by 2. When the avatar touches the key, it picks up the key and the score increases by 1. When the avatar carrying the key reaches the goal, the score increases by 1 and you win. If the avatar touches an enemy, the avatar is destroyed, the score decreases by 1, and the game is lost.
+
+=== Available Actions ===
+0: ACTION_UP
+1: ACTION_DOWN
+2: ACTION_LEFT
+3: ACTION_RIGHT
+4: ACTION_USE
+
+=== Important Mechanics Notice ===
+The avatar's facing direction matters: the first time you press a direction, the avatar may only turn; it moves only when already facing that direction.
+The sword is a short-lived spawned sprite (singleton) and you cannot spawn a new sword immediately after a successful use.
+Enemies can block each other (enemy-enemy stepBack) and the avatar cannot move into walls (stepBack).
+
+=== Sprite Mapping ===
+. > floor
+w > wall
+g > goal
++ > key
+A > avatar (no key)
+1 > monsterQuick
+2 > monsterNormal
+3 > monsterSlow
+B > sword
+C > avatar (with key)
+
+=== Current State ===
+wwwwwwwwwwwww
+w....w....g.w
+w.2.www.....w
+w....www....w
+w..wwwwwww1.w
+w......w.2..w
+w....w......w
+wA...w+.....w
+wwwwwwwwwwwww
+
+Each line below shows a non-floor entity at (row, col).
+row=0, col=0 -> w (wall)
+row=0, col=1 -> w (wall)
+row=0, col=2 -> w (wall)
+row=0, col=3 -> w (wall)
+row=0, col=4 -> w (wall)
+row=0, col=5 -> w (wall)
+row=0, col=6 -> w (wall)
+row=0, col=7 -> w (wall)
+row=0, col=8 -> w (wall)
+row=0, col=9 -> w (wall)
+row=0, col=10 -> w (wall)
+row=0, col=11 -> w (wall)
+row=0, col=12 -> w (wall)
+row=1, col=0 -> w (wall)
+row=1, col=5 -> w (wall)
+row=1, col=10 -> g (goal)
+row=1, col=12 -> w (wall)
+row=2, col=0 -> w (wall)
+row=2, col=2 -> 2 (enemy (normal))
+row=2, col=4 -> w (wall)
+row=2, col=5 -> w (wall)
+row=2, col=6 -> w (wall)
+row=2, col=12 -> w (wall)
+row=3, col=0 -> w (wall)
+row=3, col=5 -> w (wall)
+row=3, col=6 -> w (wall)
+row=3, col=7 -> w (wall)
+row=3, col=12 -> w (wall)
+row=4, col=0 -> w (wall)
+row=4, col=3 -> w (wall)
+row=4, col=4 -> w (wall)
+row=4, col=5 -> w (wall)
+row=4, col=6 -> w (wall)
+row=4, col=7 -> w (wall)
+row=4, col=8 -> w (wall)
+row=4, col=9 -> w (wall)
+row=4, col=10 -> 1 (enemy (quick))
+row=4, col=12 -> w (wall)
+row=5, col=0 -> w (wall)
+row=5, col=7 -> w (wall)
+row=5, col=9 -> 2 (enemy (normal))
+row=5, col=12 -> w (wall)
+row=6, col=0 -> w (wall)
+row=6, col=5 -> w (wall)
+row=6, col=12 -> w (wall)
+row=7, col=0 -> w (wall)
+row=7, col=1 -> A (avatar (no key))
+row=7, col=5 -> w (wall)
+row=7, col=6 -> + (key)
+row=7, col=12 -> w (wall)
+row=8, col=0 -> w (wall)
+row=8, col=1 -> w (wall)
+row=8, col=2 -> w (wall)
+row=8, col=3 -> w (wall)
+row=8, col=4 -> w (wall)
+row=8, col=5 -> w (wall)
+row=8, col=6 -> w (wall)
+row=8, col=7 -> w (wall)
+row=8, col=8 -> w (wall)
+row=8, col=9 -> w (wall)
+row=8, col=10 -> w (wall)
+row=8, col=11 -> w (wall)
+row=8, col=12 -> w (wall)
+
+OUTPUT:
+<think>
+The avatar starts at (row 7, col 1) and ends at (row 2, col 10) one step before it reaches the goal with key. The final score is 2.0.
+The agent executes the following (compressed) action steps:
+Action 1, 2, 3 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 2 time(s).
+Action 4, 5 are ACTION_RIGHT: Avatar at (row 5, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 6, 7 are ACTION_DOWN: Avatar at (row 5, col 2). It turned to face DOWN, moved DOWN 1 time(s).
+Action 8, 9 are ACTION_UP: Avatar at (row 6, col 2). It turned to face UP, moved UP 1 time(s).
+Action 10, 11 are ACTION_LEFT: Avatar at (row 5, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 12, 13 are ACTION_RIGHT: Avatar at (row 5, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 14, 15 are ACTION_LEFT: Avatar at (row 5, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 16, 17, 18 are ACTION_RIGHT: Avatar at (row 5, col 1). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 19, 20 are ACTION_DOWN: Avatar at (row 5, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 21, 22 are ACTION_RIGHT: Avatar at (row 6, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 23, 24 are ACTION_DOWN: Avatar at (row 6, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 25, 26 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 27, 28 are ACTION_RIGHT: Avatar at (row 7, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 29, 30 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 1 time(s).
+Action 31, 32 are ACTION_DOWN: Avatar at (row 6, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 33, 34 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 35, 36 are ACTION_RIGHT: Avatar at (row 7, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 37, 38, 39, 40 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 2 time(s).
+Action 41, 42, 43, 44 are ACTION_DOWN: Avatar at (row 5, col 4). It turned to face DOWN, moved DOWN 2 time(s).
+Action 45, 46, 47, 48 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 2 time(s).
+Action 49, 50, 51, 52 are ACTION_RIGHT: Avatar at (row 5, col 4). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 53, 54, 55 are ACTION_DOWN: Avatar at (row 5, col 6). It turned to face DOWN, moved DOWN 2 time(s), picked up the key at (row 7, col 6) and gained 1 point.
+Action 56 is ACTION_RIGHT: Avatar at (row 7, col 6). The key is obtained and the avatar gains 1 point. This action itself does not change the game state.
+Action 57 are ACTION_RIGHT: Avatar at (row 7, col 7). It moved RIGHT 1 time(s).
+Action 58, 59, 60 are ACTION_UP: Avatar at (row 7, col 8). It turned to face UP, moved UP 2 time(s).
+Action 61, 62 are ACTION_DOWN: Avatar at (row 5, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 63, 64, 65 are ACTION_LEFT: Avatar at (row 6, col 8). It turned to face LEFT, moved LEFT 2 time(s).
+Action 66, 67 are ACTION_UP: Avatar at (row 6, col 6). It turned to face UP, moved UP 1 time(s).
+Action 68, 69, 70, 71 are ACTION_DOWN: Avatar at (row 5, col 6). It turned to face DOWN, moved DOWN 2 time(s).
+Action 72, 73 are ACTION_UP: Avatar at (row 7, col 6). It turned to face UP, moved UP 1 time(s).
+Action 74, 75 are ACTION_DOWN: Avatar at (row 6, col 6). It turned to face DOWN, moved DOWN 1 time(s).
+Action 76, 77 are ACTION_UP: Avatar at (row 7, col 6). It turned to face UP, moved UP 1 time(s).
+Action 78, 79 are ACTION_RIGHT: Avatar at (row 6, col 6). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 80, 81 are ACTION_LEFT: Avatar at (row 6, col 7). It turned to face LEFT, moved LEFT 1 time(s).
+Action 82, 83 are ACTION_UP: Avatar at (row 6, col 6). It turned to face UP, moved UP 1 time(s).
+Action 84, 85, 86, 87 are ACTION_LEFT: Avatar at (row 5, col 6). It turned to face LEFT, moved LEFT 2 time(s).
+Action 88, 89 are ACTION_DOWN: Avatar at (row 5, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 90, 91 are ACTION_UP: Avatar at (row 6, col 4). It turned to face UP, moved UP 1 time(s).
+Action 92, 93, 94 are ACTION_RIGHT: Avatar at (row 5, col 4). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 95, 96, 97, 98, 99 are ACTION_LEFT: Avatar at (row 5, col 6). It turned to face LEFT, moved LEFT 3 time(s).
+Action 100, 101, 102, 103 are ACTION_RIGHT: Avatar at (row 5, col 3). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 104, 105, 106 are ACTION_LEFT: Avatar at (row 5, col 5). It turned to face LEFT, moved LEFT 2 time(s).
+Action 107, 108 are ACTION_DOWN: Avatar at (row 5, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 109, 110 are ACTION_UP: Avatar at (row 6, col 3). It turned to face UP, moved UP 1 time(s).
+Action 111, 112, 113, 114 are ACTION_DOWN: Avatar at (row 5, col 3). It turned to face DOWN, moved DOWN 2 time(s).
+Action 115, 116 are ACTION_UP: Avatar at (row 7, col 3). It turned to face UP, moved UP 1 time(s).
+Action 117, 118, 119 are ACTION_LEFT: Avatar at (row 6, col 3). It turned to face LEFT, moved LEFT 2 time(s).
+Action 120, 121 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 122, 123 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 124, 125 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 126, 127, 128, 129 are ACTION_RIGHT: Avatar at (row 7, col 1). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 130, 131 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 132, 133 are ACTION_RIGHT: Avatar at (row 7, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 134, 135, 136 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 2 time(s).
+Action 137, 138, 139, 140 are ACTION_RIGHT: Avatar at (row 5, col 4). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 141, 142, 143 are ACTION_DOWN: Avatar at (row 5, col 6). It turned to face DOWN, moved DOWN 2 time(s).
+Action 144, 145 are ACTION_UP: Avatar at (row 7, col 6). It turned to face UP, moved UP 1 time(s).
+Action 146, 147 are ACTION_DOWN: Avatar at (row 6, col 6). It turned to face DOWN, moved DOWN 1 time(s).
+Action 148, 149, 150, 151, 152, 153, 154 are ACTION_RIGHT: Avatar at (row 7, col 6). It turned to face RIGHT, moved RIGHT 4 time(s).
+Action 155, 156, 157, 158, 159, 160, 161 are ACTION_UP: Avatar at (row 7, col 10). It turned to face UP, moved UP 6 time(s), reached the goal and won the game.
+</think><answer>
+["ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP"]
+</answer>
+
+==============================================================================
+

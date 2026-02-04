@@ -1,0 +1,455 @@
+===== Sample 0 (L3) =====
+INPUT:
+=== Game Rules in VGDL ===
+BasicGame
+  SpriteSet
+    floor > Immovable img=oryx/floor3 hidden=True
+    goal  > Door color=GREEN img=oryx/doorclosed1
+    key   > Immovable color=ORANGE img=oryx/key2
+    sword > OrientedFlicker limit=5 singleton=True img=oryx/slash1
+    movable >
+      avatar  > ShootAvatar   stype=sword frameRate=8
+        nokey   > img=oryx/swordman1
+        withkey > color=ORANGE img=oryx/swordmankey1
+      enemy >  
+        monsterQuick > RandomNPC cooldown=2 cons=6 img=oryx/bat1
+        monsterNormal > RandomNPC cooldown=4 cons=8 img=oryx/spider2
+        monsterSlow > RandomNPC cooldown=8 cons=12 img=oryx/scorpion1
+      wall > Immovable autotiling=true img=oryx/wall3
+
+
+  LevelMapping
+    g > floor goal
+    + > floor key        
+    A > floor nokey
+    1 > floor monsterQuick
+    2 > floor monsterNormal
+    3 > floor monsterSlow
+    w > wall
+    . > floor
+
+
+  InteractionSet
+    movable wall  > stepBack
+    nokey goal    > stepBack
+    goal withkey  > killSprite scoreChange=1
+    enemy sword > killSprite scoreChange=2
+    enemy enemy > stepBack
+    avatar enemy > killSprite scoreChange=-1
+    nokey key     > transformTo stype=withkey scoreChange=1 killSecond=True
+
+  TerminationSet
+    SpriteCounter stype=goal   win=True
+    SpriteCounter stype=avatar win=False
+
+=== Game Rules in Natural Language ===
+This is a grid-based dungeon game with combat.
+You control an avatar. The avatar has two visual states: without key (A) and with key (C).
+Your task is to take the key, go to the goal, and avoid monsters.
+Directional actions can change the facing direction; if the avatar is already facing that direction, it will move one cell in that direction (otherwise it only turns).
+You can use ACTION_USE to make the avatar swing a sword to attack enemies in the adjacent cell in the current facing direction. If the attack hits, that enemy is eliminated and the score increases by 2. When the avatar touches the key, it picks up the key and the score increases by 1. When the avatar carrying the key reaches the goal, the score increases by 1 and you win. If the avatar touches an enemy, the avatar is destroyed, the score decreases by 1, and the game is lost.
+
+=== Available Actions ===
+0: ACTION_UP
+1: ACTION_DOWN
+2: ACTION_LEFT
+3: ACTION_RIGHT
+4: ACTION_USE
+
+=== Important Mechanics Notice ===
+The avatar's facing direction matters: the first time you press a direction, the avatar may only turn; it moves only when already facing that direction.
+The sword is a short-lived spawned sprite (singleton) and you cannot spawn a new sword immediately after a successful use.
+Enemies can block each other (enemy-enemy stepBack) and the avatar cannot move into walls (stepBack).
+
+=== Sprite Mapping ===
+. > floor
+w > wall
+g > goal
++ > key
+A > avatar (no key)
+1 > monsterQuick
+2 > monsterNormal
+3 > monsterSlow
+B > sword
+C > avatar (with key)
+
+=== Current State ===
+wwwwwwwwwwwww
+w..........gw
+w....w......w
+w.w.w.1.....w
+w+w.....3...w
+ww.1...2....w
+w..w..w.w.w.w
+w..BA.......w
+wwwwwwwwwwwww
+
+Each line below shows a non-floor entity at (row, col).
+row=0, col=0 -> w (wall)
+row=0, col=1 -> w (wall)
+row=0, col=2 -> w (wall)
+row=0, col=3 -> w (wall)
+row=0, col=4 -> w (wall)
+row=0, col=5 -> w (wall)
+row=0, col=6 -> w (wall)
+row=0, col=7 -> w (wall)
+row=0, col=8 -> w (wall)
+row=0, col=9 -> w (wall)
+row=0, col=10 -> w (wall)
+row=0, col=11 -> w (wall)
+row=0, col=12 -> w (wall)
+row=1, col=0 -> w (wall)
+row=1, col=11 -> g (goal)
+row=1, col=12 -> w (wall)
+row=2, col=0 -> w (wall)
+row=2, col=5 -> w (wall)
+row=2, col=12 -> w (wall)
+row=3, col=0 -> w (wall)
+row=3, col=2 -> w (wall)
+row=3, col=4 -> w (wall)
+row=3, col=6 -> 1 (enemy (quick))
+row=3, col=12 -> w (wall)
+row=4, col=0 -> w (wall)
+row=4, col=1 -> + (key)
+row=4, col=2 -> w (wall)
+row=4, col=8 -> 3 (enemy (slow))
+row=4, col=12 -> w (wall)
+row=5, col=0 -> w (wall)
+row=5, col=1 -> w (wall)
+row=5, col=3 -> 1 (enemy (quick))
+row=5, col=7 -> 2 (enemy (normal))
+row=5, col=12 -> w (wall)
+row=6, col=0 -> w (wall)
+row=6, col=3 -> w (wall)
+row=6, col=6 -> w (wall)
+row=6, col=8 -> w (wall)
+row=6, col=10 -> w (wall)
+row=6, col=12 -> w (wall)
+row=7, col=0 -> w (wall)
+row=7, col=3 -> B (sword)
+row=7, col=4 -> A (avatar (no key))
+row=7, col=12 -> w (wall)
+row=8, col=0 -> w (wall)
+row=8, col=1 -> w (wall)
+row=8, col=2 -> w (wall)
+row=8, col=3 -> w (wall)
+row=8, col=4 -> w (wall)
+row=8, col=5 -> w (wall)
+row=8, col=6 -> w (wall)
+row=8, col=7 -> w (wall)
+row=8, col=8 -> w (wall)
+row=8, col=9 -> w (wall)
+row=8, col=10 -> w (wall)
+row=8, col=11 -> w (wall)
+row=8, col=12 -> w (wall)
+
+OUTPUT:
+<think>
+The avatar starts at (row 7, col 4) and ends at (row 1, col 10) one step before it reaches the goal with key. The final score is 8.0.
+The agent executes the following (compressed) action steps:
+Action 1, 2, 3 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 2 time(s).
+Action 4, 5 are ACTION_RIGHT: Avatar at (row 7, col 2). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 6, 7, 8 are ACTION_LEFT: Avatar at (row 7, col 3). It turned to face LEFT, moved LEFT 2 time(s).
+Action 9, 10 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 11, 12 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 13, 14 are ACTION_LEFT: Avatar at (row 6, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 15, 16 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 17, 18 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 19, 20 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 21, 22 are ACTION_UP: Avatar at (row 6, col 2). It turned to face UP, moved UP 1 time(s).
+Action 23, 24, 25, 26, 27 are ACTION_RIGHT: Avatar at (row 5, col 2). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 28, 29 are ACTION_DOWN: Avatar at (row 5, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 30, 31, 32, 33, 34, 35 are ACTION_UP: Avatar at (row 6, col 5). It turned to face UP, moved UP 3 time(s).
+Action 36, 37, 38, 39, 40 are ACTION_RIGHT: Avatar at (row 3, col 5). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 41, 42, 43 are ACTION_UP: Avatar at (row 3, col 8). It turned to face UP, moved UP 2 time(s).
+Action 44, 45 are ACTION_DOWN: Avatar at (row 1, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 46, 47 are ACTION_UP: Avatar at (row 2, col 8). It turned to face UP, moved UP 1 time(s).
+Action 48, 49 are ACTION_RIGHT: Avatar at (row 1, col 8). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 50, 51 are ACTION_DOWN: Avatar at (row 1, col 9). It turned to face DOWN, moved DOWN 1 time(s).
+Action 52, 53 are ACTION_RIGHT: Avatar at (row 2, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 54, 55 are ACTION_UP: Avatar at (row 2, col 10). It turned to face UP, moved UP 1 time(s).
+Action 56, 57 are ACTION_LEFT: Avatar at (row 1, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 58, 59 are ACTION_RIGHT: Avatar at (row 1, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 60, 61 are ACTION_LEFT: Avatar at (row 1, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 62, 63 are ACTION_RIGHT: Avatar at (row 1, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 64, 65, 66, 67, 68, 69 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 4 time(s).
+Action 70, 71, 72, 73, 74, 75, 76 are ACTION_LEFT: Avatar at (row 5, col 10). It turned to face LEFT, moved LEFT 5 time(s).
+Action 77, 78, 79 are ACTION_UP: Avatar at (row 5, col 5). It turned to face UP, moved UP 2 time(s).
+Action 80, 81, 82, 83 are ACTION_DOWN: Avatar at (row 3, col 5). It turned to face DOWN, moved DOWN 2 time(s).
+Action 84, 85, 86 are ACTION_UP: Avatar at (row 5, col 5). It turned to face UP, moved UP 2 time(s).
+Action 87, 88 are ACTION_DOWN: Avatar at (row 3, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 89, 90, 91 are ACTION_LEFT: Avatar at (row 4, col 5). It turned to face LEFT, moved LEFT 2 time(s).
+Action 92, 93 are ACTION_DOWN: Avatar at (row 4, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 94, 95 are ACTION_LEFT: Avatar at (row 5, col 3). It turned to face LEFT, moved LEFT 1 time(s).
+Action 96, 97, 98 are ACTION_DOWN: Avatar at (row 5, col 2). It turned to face DOWN, moved DOWN 2 time(s).
+Action 99, 100, 101 are ACTION_UP: Avatar at (row 7, col 2). It turned to face UP, moved UP 2 time(s).
+Action 102, 103 are ACTION_DOWN: Avatar at (row 5, col 2). It turned to face DOWN, moved DOWN 1 time(s).
+Action 104, 105 are ACTION_LEFT: Avatar at (row 6, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 106, 107 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 108, 109 are ACTION_UP: Avatar at (row 6, col 2). It turned to face UP, moved UP 1 time(s).
+Action 110, 111 are ACTION_RIGHT: Avatar at (row 5, col 2). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 112 is ACTION_USE: Avatar at (row 5, col 3); using the sword towards RIGHT. An enemy is eliminated and the score increases by 2.
+Actions 113, 115, 116, 117, 118 do not change the game state, but the attack remains active during this window.
+Action 119 are ACTION_UP: Avatar at (row 5, col 4). It moved UP 1 time(s).
+Action 120, 121 are ACTION_RIGHT: Avatar at (row 4, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 122, 123, 124 are ACTION_DOWN: Avatar at (row 4, col 5). It turned to face DOWN, moved DOWN 2 time(s).
+Action 125, 126 are ACTION_LEFT: Avatar at (row 6, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 127, 128, 129 are ACTION_UP: Avatar at (row 6, col 4). It turned to face UP, moved UP 2 time(s).
+Action 130, 131 are ACTION_LEFT: Avatar at (row 4, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 132, 133 are ACTION_DOWN: Avatar at (row 4, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 134, 135, 136, 137 are ACTION_RIGHT: Avatar at (row 5, col 3). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 138, 139 are ACTION_LEFT: Avatar at (row 5, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 140, 141, 142 are ACTION_DOWN: Avatar at (row 5, col 4). It turned to face DOWN, moved DOWN 2 time(s).
+Action 143, 144 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 1 time(s).
+Action 145, 146 are ACTION_DOWN: Avatar at (row 6, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 147, 148 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 1 time(s).
+Action 149, 150 are ACTION_DOWN: Avatar at (row 6, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 151, 152, 153, 154, 155 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 3 time(s).
+Action 156, 157 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 158, 159 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 160, 161 are ACTION_UP: Avatar at (row 6, col 2). It turned to face UP, moved UP 1 time(s).
+Action 162, 163, 164, 165 are ACTION_RIGHT: Avatar at (row 5, col 2). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 166, 167, 168 are ACTION_DOWN: Avatar at (row 5, col 4). It turned to face DOWN, moved DOWN 2 time(s).
+Action 169, 170 are ACTION_RIGHT: Avatar at (row 7, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 171, 172, 173, 174, 175 are ACTION_UP: Avatar at (row 7, col 5). It turned to face UP, moved UP 4 time(s).
+Action 176, 177 are ACTION_RIGHT: Avatar at (row 3, col 5). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 178, 179 are ACTION_LEFT: Avatar at (row 3, col 6). It turned to face LEFT, moved LEFT 1 time(s).
+Action 180, 181 are ACTION_DOWN: Avatar at (row 3, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 182, 183 are ACTION_UP: Avatar at (row 4, col 5). It turned to face UP, moved UP 1 time(s).
+Action 184, 185, 186, 187, 188 are ACTION_RIGHT: Avatar at (row 3, col 5). It turned to face RIGHT, moved RIGHT 4 time(s).
+Action 189, 190 are ACTION_DOWN: Avatar at (row 3, col 9). It turned to face DOWN, moved DOWN 1 time(s).
+Action 191, 192 are ACTION_RIGHT: Avatar at (row 4, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 193, 194, 195, 196 are ACTION_UP: Avatar at (row 4, col 10). It turned to face UP, moved UP 3 time(s).
+Action 197, 198 are ACTION_LEFT: Avatar at (row 1, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 199, 200 are ACTION_RIGHT: Avatar at (row 1, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 201, 202, 203 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 2 time(s).
+Action 204, 205 are ACTION_RIGHT: Avatar at (row 3, col 10). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 206, 207 are ACTION_UP: Avatar at (row 3, col 11). It turned to face UP, moved UP 1 time(s).
+Action 208, 209 are ACTION_LEFT: Avatar at (row 2, col 11). It turned to face LEFT, moved LEFT 1 time(s).
+Action 210, 211 are ACTION_RIGHT: Avatar at (row 2, col 10). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 212, 213, 214 are ACTION_LEFT: Avatar at (row 2, col 11). It turned to face LEFT, moved LEFT 2 time(s).
+Action 215, 216 are ACTION_RIGHT: Avatar at (row 2, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 217, 218 are ACTION_UP: Avatar at (row 2, col 10). It turned to face UP, moved UP 1 time(s).
+Action 219, 220 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 1 time(s).
+Action 221, 222 are ACTION_RIGHT: Avatar at (row 2, col 10). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 223, 224, 225, 226, 227, 228, 229, 230 are ACTION_DOWN: Avatar at (row 2, col 11). It turned to face DOWN, moved DOWN 5 time(s).
+Action 231, 232, 233, 234, 235, 236, 237, 238, 239 are ACTION_LEFT: Avatar at (row 7, col 11). It turned to face LEFT, moved LEFT 7 time(s).
+Action 240, 241, 242, 243, 244, 245, 246, 247, 248 are ACTION_RIGHT: Avatar at (row 7, col 4). It turned to face RIGHT, moved RIGHT 7 time(s).
+Action 249, 250, 251, 252 are ACTION_UP: Avatar at (row 7, col 11). It turned to face UP, moved UP 2 time(s).
+Action 253, 254 are ACTION_DOWN: Avatar at (row 5, col 11). It turned to face DOWN, moved DOWN 1 time(s).
+Action 255, 256, 257 are ACTION_UP: Avatar at (row 6, col 11). It turned to face UP, moved UP 2 time(s).
+Action 258, 259, 260 are ACTION_DOWN: Avatar at (row 4, col 11). It turned to face DOWN, moved DOWN 2 time(s).
+Action 261, 262, 263 are ACTION_UP: Avatar at (row 6, col 11). It turned to face UP, moved UP 2 time(s).
+Action 264, 265 are ACTION_DOWN: Avatar at (row 4, col 11). It turned to face DOWN, moved DOWN 1 time(s).
+Action 266, 267 are ACTION_UP: Avatar at (row 5, col 11). It turned to face UP, moved UP 1 time(s).
+Action 268, 269, 270, 271 are ACTION_DOWN: Avatar at (row 4, col 11). It turned to face DOWN, moved DOWN 2 time(s).
+Action 272, 273 are ACTION_UP: Avatar at (row 6, col 11). It turned to face UP, moved UP 1 time(s).
+Action 274, 275 are ACTION_LEFT: Avatar at (row 5, col 11). It turned to face LEFT, moved LEFT 1 time(s).
+Action 276, 277, 278 are ACTION_UP: Avatar at (row 5, col 10). It turned to face UP, moved UP 2 time(s).
+Action 279, 280 are ACTION_LEFT: Avatar at (row 3, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 281, 282 are ACTION_DOWN: Avatar at (row 3, col 9). It turned to face DOWN, moved DOWN 1 time(s).
+Action 283, 284 are ACTION_UP: Avatar at (row 4, col 9). It turned to face UP, moved UP 1 time(s).
+Action 285, 286, 287, 288 are ACTION_RIGHT: Avatar at (row 3, col 9). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 289, 290, 291 are ACTION_UP: Avatar at (row 3, col 11). It turned to face UP, moved UP 1 time(s).
+Action 292 is ACTION_USE: Avatar at (row 2, col 11); using the sword towards UP. An enemy is eliminated and the score increases by 2.
+Actions 294, 295, 296, 297, 298 do not change the game state, but the attack remains active during this window.
+Action 299, 300 are ACTION_LEFT: Avatar at (row 2, col 11). It turned to face LEFT, moved LEFT 1 time(s).
+Action 301, 302 are ACTION_UP: Avatar at (row 2, col 10). It turned to face UP, moved UP 1 time(s).
+Action 303, 304 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 1 time(s).
+Action 305, 306 are ACTION_RIGHT: Avatar at (row 2, col 10). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 307, 308, 309 are ACTION_DOWN: Avatar at (row 2, col 11). It turned to face DOWN, moved DOWN 2 time(s).
+Action 310, 311 are ACTION_LEFT: Avatar at (row 4, col 11). It turned to face LEFT, moved LEFT 1 time(s).
+Action 312, 313, 314, 315 are ACTION_UP: Avatar at (row 4, col 10). It turned to face UP, moved UP 3 time(s).
+Action 316, 317, 318, 319, 320 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 4 time(s).
+Action 321, 322 are ACTION_LEFT: Avatar at (row 5, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 323, 324, 325 are ACTION_DOWN: Avatar at (row 5, col 9). It turned to face DOWN, moved DOWN 2 time(s).
+Action 326, 327 are ACTION_LEFT: Avatar at (row 7, col 9). It turned to face LEFT, moved LEFT 1 time(s).
+Action 328, 329 are ACTION_RIGHT: Avatar at (row 7, col 8). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 330, 331 are ACTION_UP: Avatar at (row 7, col 9). It turned to face UP, moved UP 1 time(s).
+Action 332, 333 are ACTION_DOWN: Avatar at (row 6, col 9). It turned to face DOWN, moved DOWN 1 time(s).
+Action 334, 335 are ACTION_LEFT: Avatar at (row 7, col 9). It turned to face LEFT, moved LEFT 1 time(s).
+Action 336, 337 are ACTION_RIGHT: Avatar at (row 7, col 8). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 338, 339 are ACTION_LEFT: Avatar at (row 7, col 9). It turned to face LEFT, moved LEFT 1 time(s).
+Action 340, 341, 342, 343, 344 are ACTION_RIGHT: Avatar at (row 7, col 8). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 345, 346, 347, 348, 349 are ACTION_UP: Avatar at (row 7, col 11). It turned to face UP, moved UP 3 time(s).
+Action 350, 351 are ACTION_LEFT: Avatar at (row 4, col 11). It turned to face LEFT, moved LEFT 1 time(s).
+Action 352, 353 are ACTION_RIGHT: Avatar at (row 4, col 10). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 354, 355 are ACTION_UP: Avatar at (row 4, col 11). It turned to face UP, moved UP 1 time(s).
+Action 356, 357, 358 are ACTION_DOWN: Avatar at (row 3, col 11). It turned to face DOWN, moved DOWN 2 time(s).
+Action 359, 360, 361, 362, 363, 364 are ACTION_LEFT: Avatar at (row 5, col 11). It turned to face LEFT, moved LEFT 3 time(s).
+Action 365, 366 are ACTION_UP: Avatar at (row 5, col 8). It turned to face UP, moved UP 1 time(s).
+Action 367, 368 are ACTION_DOWN: Avatar at (row 4, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 369, 370, 371 are ACTION_RIGHT: Avatar at (row 5, col 8). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 372, 373, 374, 375, 376, 377 are ACTION_UP: Avatar at (row 5, col 10). It turned to face UP, moved UP 4 time(s).
+Action 378, 379, 380, 381, 382 are ACTION_DOWN: Avatar at (row 1, col 10). It turned to face DOWN, moved DOWN 4 time(s).
+Action 383, 384 are ACTION_LEFT: Avatar at (row 5, col 10). It turned to face LEFT, moved LEFT 1 time(s).
+Action 385, 386 are ACTION_RIGHT: Avatar at (row 5, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 387, 388, 389 are ACTION_LEFT: Avatar at (row 5, col 10). It turned to face LEFT, moved LEFT 2 time(s).
+Action 390, 391, 392, 393, 394 are ACTION_RIGHT: Avatar at (row 5, col 8). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 395, 396, 397 are ACTION_DOWN: Avatar at (row 5, col 11). It turned to face DOWN, moved DOWN 2 time(s).
+Action 398, 399, 400, 401 are ACTION_LEFT: Avatar at (row 7, col 11). It turned to face LEFT, moved LEFT 2 time(s).
+Action 402, 403 are ACTION_RIGHT: Avatar at (row 7, col 9). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 404, 405, 406, 407, 408 are ACTION_LEFT: Avatar at (row 7, col 10). It turned to face LEFT, moved LEFT 3 time(s).
+Action 409, 410 are ACTION_RIGHT: Avatar at (row 7, col 7). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 411, 412, 413, 414, 415, 416, 417 are ACTION_LEFT: Avatar at (row 7, col 8). It turned to face LEFT, moved LEFT 5 time(s).
+Action 418, 419 are ACTION_RIGHT: Avatar at (row 7, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 420, 421, 422, 423, 424 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 3 time(s).
+Action 425, 426 are ACTION_LEFT: Avatar at (row 4, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 427, 428 are ACTION_RIGHT: Avatar at (row 4, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 429, 430 are ACTION_LEFT: Avatar at (row 4, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 431, 432 are ACTION_RIGHT: Avatar at (row 4, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 433, 434 are ACTION_DOWN: Avatar at (row 4, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 435, 436 are ACTION_RIGHT: Avatar at (row 5, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 437, 438 are ACTION_DOWN: Avatar at (row 5, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 439, 440 are ACTION_LEFT: Avatar at (row 6, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 441, 442 are ACTION_UP: Avatar at (row 6, col 4). It turned to face UP, moved UP 1 time(s).
+Action 443, 444 are ACTION_LEFT: Avatar at (row 5, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 445, 446 are ACTION_UP: Avatar at (row 5, col 3). It turned to face UP, moved UP 1 time(s).
+Action 447, 448, 449 are ACTION_RIGHT: Avatar at (row 4, col 3). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 450, 451 are ACTION_UP: Avatar at (row 4, col 5). It turned to face UP, moved UP 1 time(s).
+Action 452, 453, 454 are ACTION_RIGHT: Avatar at (row 3, col 5). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 455, 456 are ACTION_UP: Avatar at (row 3, col 7). It turned to face UP, moved UP 1 time(s).
+Action 457, 458 are ACTION_LEFT: Avatar at (row 2, col 7). It turned to face LEFT, moved LEFT 1 time(s).
+Action 459, 460 are ACTION_UP: Avatar at (row 2, col 6). It turned to face UP, moved UP 1 time(s).
+Action 461, 462, 463, 464, 465, 466 are ACTION_RIGHT: Avatar at (row 1, col 6). It turned to face RIGHT, moved RIGHT 4 time(s).
+Action 467, 468, 469, 470, 471 are ACTION_LEFT: Avatar at (row 1, col 10). It turned to face LEFT, moved LEFT 3 time(s).
+Action 472 are ACTION_RIGHT: Avatar at (row 1, col 7). It turned to face RIGHT.
+Action 473 is ACTION_USE: Avatar at (row 1, col 7); using the sword towards RIGHT. An enemy is eliminated and the score increases by 2.
+Actions 474, 475, 476, 477, 478 do not change the game state, but the attack remains active during this window.
+Action 480, 481, 482, 483 are ACTION_LEFT: Avatar at (row 1, col 7). It turned to face LEFT, moved LEFT 2 time(s).
+Action 484, 485, 486, 487, 488, 489 are ACTION_RIGHT: Avatar at (row 1, col 5). It turned to face RIGHT, moved RIGHT 4 time(s).
+Action 490, 491, 492 are ACTION_LEFT: Avatar at (row 1, col 9). It turned to face LEFT, moved LEFT 2 time(s).
+Action 493, 494, 495 are ACTION_DOWN: Avatar at (row 1, col 7). It turned to face DOWN, moved DOWN 2 time(s).
+Action 496, 497 are ACTION_UP: Avatar at (row 3, col 7). It turned to face UP, moved UP 1 time(s).
+Action 498, 499, 500 are ACTION_DOWN: Avatar at (row 2, col 7). It turned to face DOWN, moved DOWN 2 time(s).
+Action 501, 502 are ACTION_UP: Avatar at (row 4, col 7). It turned to face UP, moved UP 1 time(s).
+Action 503, 504, 505 are ACTION_LEFT: Avatar at (row 3, col 7). It turned to face LEFT, moved LEFT 2 time(s).
+Action 506, 507 are ACTION_DOWN: Avatar at (row 3, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 508, 509 are ACTION_UP: Avatar at (row 4, col 5). It turned to face UP, moved UP 1 time(s).
+Action 510, 511, 512, 513, 514 are ACTION_RIGHT: Avatar at (row 3, col 5). It turned to face RIGHT, moved RIGHT 3 time(s).
+Action 515, 516, 517 are ACTION_UP: Avatar at (row 3, col 8). It turned to face UP, moved UP 2 time(s).
+Action 518, 519 are ACTION_DOWN: Avatar at (row 1, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 520, 521, 522 are ACTION_LEFT: Avatar at (row 2, col 8). It turned to face LEFT, moved LEFT 2 time(s).
+Action 523, 524 are ACTION_UP: Avatar at (row 2, col 6). It turned to face UP, moved UP 1 time(s).
+Action 525, 526 are ACTION_RIGHT: Avatar at (row 1, col 6). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 527, 528, 529, 530, 531 are ACTION_LEFT: Avatar at (row 1, col 7). It turned to face LEFT, moved LEFT 3 time(s).
+Action 532, 533 are ACTION_RIGHT: Avatar at (row 1, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 534, 535 are ACTION_LEFT: Avatar at (row 1, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 536, 537 are ACTION_RIGHT: Avatar at (row 1, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 538, 539 are ACTION_LEFT: Avatar at (row 1, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 540, 541 are ACTION_RIGHT: Avatar at (row 1, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 542, 543, 544 are ACTION_LEFT: Avatar at (row 1, col 5). It turned to face LEFT, moved LEFT 2 time(s).
+Action 545, 546, 547, 548, 549 are ACTION_DOWN: Avatar at (row 1, col 3). It turned to face DOWN, moved DOWN 3 time(s).
+Action 550, 551, 552, 553 are ACTION_RIGHT: Avatar at (row 4, col 3). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 554, 555 are ACTION_DOWN: Avatar at (row 4, col 5). It turned to face DOWN, moved DOWN 1 time(s).
+Action 556, 557 are ACTION_UP: Avatar at (row 5, col 5). It turned to face UP, moved UP 1 time(s).
+Action 558, 559, 560 are ACTION_LEFT: Avatar at (row 4, col 5). It turned to face LEFT, moved LEFT 2 time(s).
+Action 561, 562 are ACTION_DOWN: Avatar at (row 4, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 563, 564 are ACTION_LEFT: Avatar at (row 5, col 3). It turned to face LEFT, moved LEFT 1 time(s).
+Action 565, 566, 567, 568 are ACTION_RIGHT: Avatar at (row 5, col 2). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 569, 570 are ACTION_UP: Avatar at (row 5, col 4). It turned to face UP, moved UP 1 time(s).
+Action 571, 572 are ACTION_DOWN: Avatar at (row 4, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 573, 574 are ACTION_UP: Avatar at (row 5, col 4). It turned to face UP, moved UP 1 time(s).
+Action 575, 576, 577, 578 are ACTION_DOWN: Avatar at (row 4, col 4). It turned to face DOWN, moved DOWN 3 time(s).
+Action 579, 580, 581, 582, 583 are ACTION_LEFT: Avatar at (row 7, col 4). It turned to face LEFT, moved LEFT 3 time(s).
+Action 584, 585 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 586, 587 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 588, 589 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 590, 591 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 592, 593 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 594, 595 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 596, 597 are ACTION_UP: Avatar at (row 6, col 2). It turned to face UP, moved UP 1 time(s).
+Action 598, 599, 600 are ACTION_RIGHT: Avatar at (row 5, col 2). It turned to face RIGHT, moved RIGHT 2 time(s).
+Action 601, 602 are ACTION_LEFT: Avatar at (row 5, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 603, 604 are ACTION_RIGHT: Avatar at (row 5, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 605, 606 are ACTION_LEFT: Avatar at (row 5, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 607, 608, 609, 610, 611, 612 are ACTION_UP: Avatar at (row 5, col 3). It turned to face UP, moved UP 3 time(s).
+Action 613, 614, 615 are ACTION_DOWN: Avatar at (row 2, col 3). It turned to face DOWN, moved DOWN 2 time(s).
+Action 616, 617 are ACTION_RIGHT: Avatar at (row 4, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 618, 619, 620, 621, 622, 623 are ACTION_DOWN: Avatar at (row 4, col 4). It turned to face DOWN, moved DOWN 3 time(s).
+Action 624, 625 are ACTION_UP: Avatar at (row 7, col 4). It turned to face UP, moved UP 1 time(s).
+Action 626, 627 are ACTION_RIGHT: Avatar at (row 6, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 628, 629 are ACTION_LEFT: Avatar at (row 6, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 630, 631 are ACTION_RIGHT: Avatar at (row 6, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 632, 633 are ACTION_LEFT: Avatar at (row 6, col 5). It turned to face LEFT, moved LEFT 1 time(s).
+Action 634, 635 are ACTION_DOWN: Avatar at (row 6, col 4). It turned to face DOWN, moved DOWN 1 time(s).
+Action 636, 637 are ACTION_RIGHT: Avatar at (row 7, col 4). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 638, 639, 640, 641, 642 are ACTION_LEFT: Avatar at (row 7, col 5). It turned to face LEFT, moved LEFT 3 time(s).
+Action 643, 644 are ACTION_UP: Avatar at (row 7, col 2). It turned to face UP, moved UP 1 time(s).
+Action 645, 646 are ACTION_LEFT: Avatar at (row 6, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 647, 648 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 649, 650 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 651, 652 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 653, 654 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 655, 656 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 657, 658 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 659, 660 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 661, 662 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 663, 664 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 665, 666 are ACTION_DOWN: Avatar at (row 6, col 2). It turned to face DOWN, moved DOWN 1 time(s).
+Action 667, 668 are ACTION_UP: Avatar at (row 7, col 2). It turned to face UP, moved UP 1 time(s).
+Action 669, 670 are ACTION_LEFT: Avatar at (row 6, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 671, 672 are ACTION_DOWN: Avatar at (row 6, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 673, 674 are ACTION_UP: Avatar at (row 7, col 1). It turned to face UP, moved UP 1 time(s).
+Action 675, 676 are ACTION_RIGHT: Avatar at (row 6, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 677, 678 are ACTION_DOWN: Avatar at (row 6, col 2). It turned to face DOWN, moved DOWN 1 time(s).
+Action 679, 680, 681 are ACTION_UP: Avatar at (row 7, col 2). It turned to face UP, moved UP 2 time(s).
+Action 682, 683, 684, 685 are ACTION_DOWN: Avatar at (row 5, col 2). It turned to face DOWN, moved DOWN 2 time(s).
+Action 686, 687, 688, 689, 690, 691, 692, 693, 694, 695, 696, 697, 698, 699, 700 are ACTION_RIGHT: Avatar at (row 7, col 2). It turned to face RIGHT, moved RIGHT 9 time(s).
+Action 701, 702, 703, 704, 705, 706, 707 are ACTION_UP: Avatar at (row 7, col 11). It turned to face UP, moved UP 5 time(s).
+Action 708, 709, 710, 711, 712 are ACTION_LEFT: Avatar at (row 2, col 11). It turned to face LEFT, moved LEFT 4 time(s).
+Action 713, 714 are ACTION_RIGHT: Avatar at (row 2, col 7). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 715, 716 are ACTION_UP: Avatar at (row 2, col 8). It turned to face UP, moved UP 1 time(s).
+Action 717, 718 are ACTION_DOWN: Avatar at (row 1, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 719, 720 are ACTION_UP: Avatar at (row 2, col 8). It turned to face UP, moved UP 1 time(s).
+Action 721, 722 are ACTION_RIGHT: Avatar at (row 1, col 8). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 723, 724, 725 are ACTION_DOWN: Avatar at (row 1, col 9). It turned to face DOWN, moved DOWN 2 time(s).
+Action 726, 727, 728, 729 are ACTION_UP: Avatar at (row 3, col 9). It turned to face UP, moved UP 2 time(s).
+Action 730, 731 are ACTION_LEFT: Avatar at (row 1, col 9). It turned to face LEFT, moved LEFT 1 time(s).
+Action 732, 733 are ACTION_DOWN: Avatar at (row 1, col 8). It turned to face DOWN, moved DOWN 1 time(s).
+Action 734, 735 are ACTION_UP: Avatar at (row 2, col 8). It turned to face UP, moved UP 1 time(s).
+Action 736, 737, 738 are ACTION_LEFT: Avatar at (row 1, col 8). It turned to face LEFT, moved LEFT 2 time(s).
+Action 739, 740, 741, 742, 743, 744 are ACTION_DOWN: Avatar at (row 1, col 6). It turned to face DOWN, moved DOWN 4 time(s).
+Action 745, 746, 747, 748, 749 are ACTION_LEFT: Avatar at (row 5, col 6). It turned to face LEFT, moved LEFT 3 time(s).
+Action 750, 751, 752, 753, 754, 755 are ACTION_UP: Avatar at (row 5, col 3). It turned to face UP, moved UP 4 time(s).
+Action 756, 757, 758 are ACTION_LEFT: Avatar at (row 1, col 3). It turned to face LEFT, moved LEFT 2 time(s).
+Action 759, 760 are ACTION_RIGHT: Avatar at (row 1, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 761, 762 are ACTION_LEFT: Avatar at (row 1, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 763, 764 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 765, 766 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 767, 768 are ACTION_RIGHT: Avatar at (row 1, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 769, 770 are ACTION_LEFT: Avatar at (row 1, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 771, 772 are ACTION_RIGHT: Avatar at (row 1, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 773, 774 are ACTION_LEFT: Avatar at (row 1, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 775, 776, 777, 778 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 3 time(s), picked up the key at (row 4, col 1) and gained 1 point.
+Action 779 is ACTION_RIGHT: Avatar at (row 4, col 1). The key is obtained and the avatar gains 1 point. This action itself does not change the game state.
+Action 780, 781, 782, 783, 784 are ACTION_UP: Avatar at (row 4, col 1). It turned to face UP, moved UP 3 time(s).
+Action 785, 786 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 787, 788 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 789, 790, 791 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 2 time(s).
+Action 792, 793 are ACTION_UP: Avatar at (row 3, col 1). It turned to face UP, moved UP 1 time(s).
+Action 794, 795 are ACTION_RIGHT: Avatar at (row 2, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 796, 797 are ACTION_LEFT: Avatar at (row 2, col 2). It turned to face LEFT, moved LEFT 1 time(s).
+Action 798, 799 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 800, 801 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 802, 803 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 804, 805 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 806, 807 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 808, 809 are ACTION_DOWN: Avatar at (row 1, col 1). It turned to face DOWN, moved DOWN 1 time(s).
+Action 810, 811 are ACTION_UP: Avatar at (row 2, col 1). It turned to face UP, moved UP 1 time(s).
+Action 812, 813 are ACTION_RIGHT: Avatar at (row 1, col 1). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 814, 815 are ACTION_DOWN: Avatar at (row 1, col 2). It turned to face DOWN, moved DOWN 1 time(s).
+Action 816, 817 are ACTION_RIGHT: Avatar at (row 2, col 2). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 818, 819 are ACTION_UP: Avatar at (row 2, col 3). It turned to face UP, moved UP 1 time(s).
+Action 820, 821 are ACTION_DOWN: Avatar at (row 1, col 3). It turned to face DOWN, moved DOWN 1 time(s).
+Action 822, 823 are ACTION_RIGHT: Avatar at (row 2, col 3). It turned to face RIGHT, moved RIGHT 1 time(s).
+Action 824, 825 are ACTION_LEFT: Avatar at (row 2, col 4). It turned to face LEFT, moved LEFT 1 time(s).
+Action 826, 827 are ACTION_UP: Avatar at (row 2, col 3). It turned to face UP, moved UP 1 time(s).
+Action 828, 829 are ACTION_LEFT: Avatar at (row 1, col 3). It turned to face LEFT, moved LEFT 1 time(s).
+Action 830, 831, 832, 833, 834, 835, 836, 837, 838, 839, 840, 841, 842, 843 are ACTION_RIGHT: Avatar at (row 1, col 2). It turned to face RIGHT, moved RIGHT 9 time(s), reached the goal and won the game.
+</think><answer>
+["ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_USE", "ACTION_USE", "ACTION_RIGHT", "ACTION_USE", "ACTION_USE", "ACTION_UP", "ACTION_USE", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_USE", "ACTION_RIGHT", "ACTION_UP", "ACTION_USE", "ACTION_USE", "ACTION_RIGHT", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_USE", "ACTION_USE", "ACTION_UP", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_UP", "ACTION_UP", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_UP", "ACTION_UP", "ACTION_DOWN", "ACTION_DOWN", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_LEFT", "ACTION_LEFT", "ACTION_UP", "ACTION_UP", "ACTION_LEFT", "ACTION_LEFT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT", "ACTION_RIGHT"]
+</answer>
+
+==============================================================================
+
