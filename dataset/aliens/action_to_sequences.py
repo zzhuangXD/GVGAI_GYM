@@ -175,7 +175,7 @@ def find_action_sequences(input_file, output_file):
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_file_path = os.path.join(script_dir, 'output.txt')
-    output_file_path = os.path.join(script_dir, 'action_sequences.json')
+    input_file_path = os.path.join(script_dir, 'output_L4.txt')
+    output_file_path = os.path.join(script_dir, 'action_sequences_L4.json')
     
     find_action_sequences(input_file_path, output_file_path)

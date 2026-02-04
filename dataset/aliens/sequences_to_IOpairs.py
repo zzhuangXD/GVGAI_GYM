@@ -5,8 +5,8 @@ import json
 import os
 from typing import Any, Dict, List, Tuple, Optional
 
-INPUT_FILE = "action_sequences.json"
-OUTPUT_FILE = "aliens_dataset.json"
+INPUT_FILE = "action_sequences_L4.json"
+OUTPUT_FILE = "aliens_dataset_L4.json"
 
 
 def load_data(path: str) -> Tuple[List[Dict[str, Any]], Dict[str, str]]:

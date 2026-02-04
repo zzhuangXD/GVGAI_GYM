@@ -6,10 +6,9 @@ import os
 
 LEVELS = range(5)  # L0-L4
 
-
 def convert_one(level: int, script_dir: str) -> None:
-    input_json = f"aliens_dataset_L{level}.json"
-    output_txt = f"aliens_dataset_readable_L{level}.txt"
+    input_json = f"zelda_dataset_L{level}.json"
+    output_txt = f"zelda_dataset_readable_L{level}.txt"
 
     in_path = os.path.join(script_dir, input_json)
     out_path = os.path.join(script_dir, output_txt)

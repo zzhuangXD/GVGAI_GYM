@@ -116,6 +116,6 @@ def format_json_output(input_file, output_file):
 
 if __name__ == "__main__":
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    output_file_path = os.path.join(script_dir, 'output.txt')
+    output_file_path = os.path.join(script_dir, 'output_L4.txt')
 
     format_json_output(output_file_path, output_file_path)

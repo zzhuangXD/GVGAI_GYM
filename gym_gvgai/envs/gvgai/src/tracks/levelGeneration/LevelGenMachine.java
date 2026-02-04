@@ -220,7 +220,7 @@ public class LevelGenMachine
             score = toPlay.runGame(p, randomSeed)[0];
 
         // Finally, when the game is over, we need to tear the player down.
-        ArcadeMachine.tearPlayerDown(toPlay, p, actionFile, randomSeed, true);
+        ArcadeMachine.tearPlayerDown(toPlay, p, actionFile, randomSeed, true, "");
 
         double result = toPlay.handleResult()[0];
         toPlay.printResult();
@@ -307,7 +307,7 @@ public class LevelGenMachine
 
             // Finally, when the game is over, we need to tear the player down.
             if (player != null)
-                ArcadeMachine.tearPlayerDown(toPlay, p, filename, randomSeed, true);
+                ArcadeMachine.tearPlayerDown(toPlay, p, filename, randomSeed, true, "");
 
             // reset the game.
             toPlay.reset();

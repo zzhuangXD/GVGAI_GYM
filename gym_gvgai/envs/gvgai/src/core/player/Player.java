@@ -161,7 +161,7 @@ public abstract class Player {
     }
 
 
-    final public void teardown(Game played) {
+    final public void teardown(Game played, String gameName) {
         try {
             if ((this.actionFile != null && !actionFile.equals("")) && SHOULD_LOG) {
                 Map<String, Object> finalJson = new LinkedHashMap<>();
@@ -211,21 +211,37 @@ public abstract class Player {
 //                     System.out.println("------------------------------------");
 //                 }
 //                 --- END ---
-                    if (npcPositions != null) {
-                        int alienGreenId = VGDLRegistry.GetInstance().getRegisteredSpriteValue("alienGreen");
-                        int alienBlueId = VGDLRegistry.GetInstance().getRegisteredSpriteValue("alienBlue");
 
-                        for (ArrayList<Observation> npcList : npcPositions) {
-                            if (npcList != null) {
-                                for (Observation npc : npcList) {
-                                    if (npc.itype == alienGreenId || npc.itype == alienBlueId) {
-                                        numAliens++;
+                    // 0 Aliens
+                    if(gameName.equals("aliens")){
+                        if (npcPositions != null) {
+                            int alienGreenId = VGDLRegistry.GetInstance().getRegisteredSpriteValue("alienGreen");
+                            int alienBlueId = VGDLRegistry.GetInstance().getRegisteredSpriteValue("alienBlue");
+
+                            for (ArrayList<Observation> npcList : npcPositions) {
+                                if (npcList != null) {
+                                    for (Observation npc : npcList) {
+                                        if (npc.itype == alienGreenId || npc.itype == alienBlueId) {
+                                            numAliens++;
+                                        }
                                     }
                                 }
                             }
                         }
+
+                        actionRecord.put("num_of_aliens", numAliens);
                     }
-                    actionRecord.put("num_of_aliens", numAliens);
+
+
+                    // 1 Escape
+                    if(gameName.equals("escape")){
+                        actionRecord.put("escaper", 0);
+                    }
+
+
+
+
+                    // END OF GAMES
                     ArrayList<ArrayList<String>> map = convertStateToMap(turn.state, played);
                     actionRecord.put("map", map);
 

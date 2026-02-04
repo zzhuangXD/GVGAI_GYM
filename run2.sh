@@ -32,14 +32,16 @@ rm sources.txt
 echo "--- Compilation Successful! ---"
 echo ""
 
-echo "--- LAUNCHING AGENT ON ALIENS ---"
+echo "--- LAUNCHING AGENT ON ESCAPE ---"
 # Run the competition framework with the specified game and our Optimized MCTS agent
-java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/aliens_v0/aliens.txt gym_gvgai/envs/games/aliens_v0/aliens_lvl0.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/aliens/output.txt
-#java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/angelsdemons_v0/angelsdemons.txt gym_gvgai/envs/games/angelsdemons_v0/angelsdemons_lvl0.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS output.txt
+#java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/sokoban_v0/sokoban.txt gym_gvgai/envs/games/sokoban_v0/sokoban_lvl0.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/sokoban/output.txt
+#java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/zelda_v0/zelda.txt gym_gvgai/envs/games/zelda_v0/zelda_lvl4.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/zelda/output_L4.txt
+#java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/escape_v0/escape.txt gym_gvgai/envs/games/escape_v0/escape_lvl0.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/escape/output.txt
+java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/aliens_v0/aliens.txt gym_gvgai/envs/games/aliens_v0/aliens_lvl4.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/aliens/output_L4.txt
 
 echo ""
 echo "--- Game Finished ---"
 echo ""
 
-#python3 project/utils/format_output.py
-#echo "--- Formatting Complete ---"
+python3 dataset/escape/format_output.py
+echo "--- Formatting Complete ---"

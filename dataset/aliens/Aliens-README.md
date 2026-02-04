@@ -4,15 +4,13 @@
 
 * 示例输出：GVGAI_GYM\dataset\aliens\Example
 
-* 输出attribute详解见slides: https://docs.google.com/presentation/d/1ibhKyn32cAffbXrgvY8cfaZiiugpojE_6OxL0UfNlGA/edit?usp=sharing）
-
-
-
-
-
 0. 在项目根目录下```conda env create -f environment.yml```重建环境
 
-1. Run MCTS on one game（当前参数运行aliens_lv0） -> 输出**output.txt**，包含每一个action的基本数据
+1. 修改run2.sh中LAUNCHING AGENT ON...部分的参数，更改为当前想要运行的游戏X和level Y
+   ```
+   java -cp $RUNTIME_CP core.competition.AgentExecutor gym_gvgai/envs/games/X_v0/X.txt gym_gvgai/envs/games/X_v0/X_lvlY.txt tracks.singlePlayer.optimized_mcts.OptimizedMCTS ./dataset/X/output.txt
+   ```
+   运行run2.sh, 输出**output.txt**，包含每一个action的基本数据, 命令为
 
    ```
    ./run2.sh

@@ -168,7 +168,8 @@ public class ArcadeMachine {
 			score = toPlay.runGame(players, randomSeed);
 
 		// Finally, when the game is over, we need to tear the players down.
-		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true);
+        String gameName = game_file.substring(game_file.lastIndexOf('/') + 1).replaceFirst("\\..*$", "");
+		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true, gameName);
 
 		// This, the last thing to do in this method, always:
 		toPlay.handleResult();
@@ -363,7 +364,8 @@ public class ArcadeMachine {
 
 		// Finally, when the game is over, we need to tear the player down.
 		// Actually in this case this might never do anything.
-		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, seed, false);
+        String gameName = game_file.substring(game_file.lastIndexOf('/') + 1).replaceFirst("\\..*$", "");
+		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, seed, false, gameName);
 
 		for (int i = 0; i < toPlay.getNoPlayers(); i++) {
 			int actualWinner = (toPlay.getWinner(i) == Types.WINNER.PLAYER_WINS ? 1 : 0);
@@ -485,7 +487,8 @@ public class ArcadeMachine {
 
 		// Finally, when the game is over, we need to tear the players
 		// down.
-		if (!ArcadeMachine.tearPlayerDown(toPlay, players, filename, randomSeed, true)) {
+        String gameName = game_file.substring(game_file.lastIndexOf('/') + 1).replaceFirst("\\..*$", "");
+		if (!ArcadeMachine.tearPlayerDown(toPlay, players, filename, randomSeed, true, gameName)) {
 		    score = toPlay.handleResult();
 		    toPlay.printResult();
 		}
@@ -837,7 +840,7 @@ public class ArcadeMachine {
      * @return false if there was a timeout from the players. true otherwise.
      */
     public static boolean tearPlayerDown(Game toPlay, Player[] players, String actionFile, int randomSeed,
-	    boolean record) {
+	    boolean record, String gameName) {
 
         // First, inform the players about the result.
         // This is important so the agent can have the final game state before teardown.
@@ -894,7 +897,7 @@ public class ArcadeMachine {
                 }
             } else {
                 // single player, let the player do all of this.
-                players[0].teardown(toPlay);
+                players[0].teardown(toPlay, gameName);
             }
         }
 

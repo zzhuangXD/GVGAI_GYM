@@ -162,7 +162,7 @@ public class RuleGenMachine
 			score = toPlay.runGame(players, randomSeed);
 
 		// Finally, when the game is over, we need to tear the players down.
-		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true);
+		ArcadeMachine.tearPlayerDown(toPlay, players, actionFile, randomSeed, true, "");
 
 		// This, the last thing to do in this method, always:
 		toPlay.handleResult();

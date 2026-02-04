@@ -466,7 +466,7 @@ public class LearningMachine {
      * @param player player to be closed.
      */
     private static void tearPlayerDown(LearningPlayer player, Game toPlay) throws IOException {
-        player.teardown(toPlay);
+        player.teardown(toPlay, "");
     }
 
     /**

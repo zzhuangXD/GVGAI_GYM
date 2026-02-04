@@ -28,17 +28,18 @@ public class Test {
 
 		//Load available games
 		String spGamesCollection =  "examples/all_games_sp.csv";
-		String[][] games = Utils.readGames(spGamesCollection);
+		String[][] games = Utils.readGames(spGamesCollection); // games[line_index][0] = line_index, games[line_index][1] = game full path
 
 		//Game settings
 		boolean visuals = true;
 		int seed = new Random().nextInt();
 
 		// Game and level to play
-		int gameIdx = 0;
-		int levelIdx = 0; // level names from 0 to 4 (game_lvlN.txt).
-		String gameName = games[gameIdx][1];
+		// ==== ==== ==== ==== ==== ==== Set the game and level to test here ==== ==== ==== ==== ==== ====
+		int gameIdx = 1;  // Choose the game to test in all_games_sp
+		int levelIdx = 1; // level names from 0 to 4 (game_lvlN.txt).
 		String game = games[gameIdx][0];
+		String gameName = games[gameIdx][1];
 		String suffix = "/" + gameName + ".txt";
         String replacement = "/" + gameName + "_lvl" + levelIdx + ".txt";
 
@@ -57,10 +58,10 @@ public class Test {
 						// executed. null if not to save.
 
 		// 1. This starts a game, in a level, played by a human.
- 		ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
+ 		//ArcadeMachine.playOneGame(game, level1, recordActionsFile, seed);
 
 		// 2. This plays a game in a level by the controller.
-// 		ArcadeMachine.runOneGame(game, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
+ 		ArcadeMachine.runOneGame(game, level1, visuals, sampleMCTSController, recordActionsFile, seed, 0);
 
 
 		// 3. This replays a game from an action file previously recorded
